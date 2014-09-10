@@ -19,7 +19,7 @@ MUL_OP:		.equ	0x33
                                             ; and retain current section
             .retainrefs                     ; Additionally retain any sections
                                             ; that have references to current
-Calc_Instr: .byte	0x09, 0x11, 0x01, 0x22, 0x05, 0x55		        ; section
+Calc_Instr: .byte	0x22, 0x11, 0x22, 0x22, 0x33, 0x33, 0x08, 0x44, 0x08, 0x22, 0x09, 0x44, 0xff, 0x11, 0xff, 0x44, 0xcc, 0x33, 0x02, 0x33, 0x00, 0x44, 0x33, 0x33, 0x08, 0x55		        ; section
 
 
 ;-------------------------------------------------------------------------------
@@ -63,24 +63,23 @@ ADD
 			mov.b	r7, r8   			;r8 will hold the previous value and the first value as seen before
 			inc		r5
 
-			cmp		#255, r8
-			jz		setHigh
+			cmp		#256, r8
+			jge		setHigh
 
 			jmp		main
 SUB
 			mov.b	0(r4), r7
 			inc		r4
 
+			cmp		r8, r7				;first check if the answer will be negative before you perform the operation
+			jge		setLow
 			sub.b	r7, r8
 			mov.b	r8, 0(r5)
 			inc		r5
-
-			cmp		#0, r8
-			jz		setHigh
-
 			jmp		main
 
 CLR
+			inc		r4
 			mov.b	#0, r8
 			mov.b	r8, 0(r5)
 			inc		r5
@@ -90,26 +89,35 @@ MULT								;r8  x  r7...   r9 = # of iterations... r10 = summer
 			mov.b	0(r4), r7
 			inc		r4
 			mov		r7, r11			;r11 will be the one that we are manipulating in the multLoop
-			mov		#0, r3			;keep track of how many left shifts
+			mov		#0, r14			;r14 will keep track of how many left shifts
 			mov		#0, r10
+
+			tst		r8
+			jz		setHigh
+
+			tst		r7
+			jz		setLow
 
 			mov		r7, r9
 			clrc
-			rrc		r9			;now r9 equals the number of iterations
+			rrc		r9
+			add		#1, r9			;now r9 equals the number of iterations
 									;we have to go through mult loop
 			mov		#1, r12 		;r12 will be my count up for bit to "and" with
 			jmp 	multLoop
 
 multLoop
+			mov		r14,	r6				;r6 will decrement while adding left shifts to get the correct number of left shifts
+			mov		r8, r13
 			mov		r7, r11
-			and.w	#r12, r11
-			cmp		#1, r11
-			jnz		addLeftS
-			jmp		addZero
+			and.w	r12, r11
+			cmp		r12, r11
+			jz		addLeftS
+			jmp		comeBack
 comeBack
 			rla.w	r12
-			inc		r3
-			cmp		r3, r9
+			inc		r14
+			cmp		r14, r7
 			jnz		multLoop		;if not done with iterations, continue
 
 			mov.b	r10, r8
@@ -119,26 +127,33 @@ comeBack
 
 
 addLeftS
-			tst		r3
-			jnz		onWard
-			add		r8, r10
-			jmp		comeBack
-onWard												;something still wrong with # of shift lefts.
-			rla.w	r8
-			add		r8, r10
-			jmp		comeBack
+			tst		r14
+			jnz		onWard		;(not a zero) so if one or more left shifts are necessary jump to onWard
+			jmp		sumIt
+onWard
+			tst		r6
+			jz		sumIt										;something still wrong with # of shift lefts.
+			rla.w	r13
+			dec		r6
+			jmp		onWard
 
-addZero		jmp		multLoop			;here just for consistency and thought process
+sumIt
+			add		r13, r10
+			cmp		#256, r10
+			jge		setHigh
+			jmp		comeBack
 
 
 setHigh
-			mov.b	#255, r8
+			mov.b	#0xff, r8
 			mov.b	r8, 0(r5)
+			inc		r5
 			jmp		main
 
 setLow
 			mov.b	#0, r8
 			mov.b	r8, 0(r5)
+			inc		r5
 			jmp		main
 
 
