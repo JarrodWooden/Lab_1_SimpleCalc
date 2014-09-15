@@ -17,7 +17,7 @@ Multiplication Ideas:
   
   The most difficult subroutine for the calculator was going to be creating a method for the multiply operation.
   Therefore I began by writing ideas of how to multiply two numbers together in assembly
-    -I started by just multiplying two numbers together in binary and trying to figure out how the 
+    I started by just multiplying two numbers together in binary and trying to figure out how the 
       process works.
       
     After I figured out a process for multiplying to binary numbers together, I began to think about how I could implement
