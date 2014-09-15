@@ -101,3 +101,41 @@ CLR
 
 The end method simply traps the CPU in loop.
 
+##B Functionality: Creating Boundaries for the Calculator
+
+For 'B' Functionality all we had to do was to set boundaries for the calculator. The lower boundary was zero, and the upper 
+boundary was 255. If the calculator performed an operation in which the program either exceeded 255 or fell below 0, then the
+calculator would set the answer at either 255 or 0 respectively. 
+
+I simply called these subroutines setHigh and setLow.
+
+Here are my subroutines:
+
+```
+;setHigh -- this subroutine will simply set the answer to 0xff if the value in any operation exceeds
+;this value (this is our upper limit)
+;
+;
+setHigh
+			mov.b	#0xff, r8
+			mov.b	r8, 0(r5)
+			inc		r5
+			jmp		main
+;------------------------------End of set High----------------------------------;
+
+;setLow -- this subroutine will simply set the answer to 0x00 if the value in any operation is less than
+;this value (this is our lower limit)
+
+setLow
+			mov.b	#0, r8
+			mov.b	r8, 0(r5)
+			inc		r5
+			jmp		main
+```
+
+##A Functionality: Subroutine Multiply
+
+
+
+
+
