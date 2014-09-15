@@ -32,7 +32,33 @@ Multiplication Ideas:
 
 ####Main Loop
 
+The main loop here decides which operation we are supposed to do and will jump to the proper subroutine.
+
+```
+    		cmp		#ADD_OP, r6
+    		jz		ADD
+
+    		cmp		#SUB_OP, r6
+    		jz		SUB
+
+    		cmp		#CLR_OP, r6
+    		jz		CLR
+
+    		cmp		#MUL_OP, r6
+    		jz		MULT
+
+    		cmp		#END_OP, r6
+    		jmp		forever
+```
+
+Very Basic, just jump to the subroutine that you need to do if the operand matches the operand given in the program.
+
 ####Addition
+
+Addition is straight forward. It takes the previous value r8 and adds it to the next value in the program using the instruction
+for addition in assembly.
+
+An example of how I did the operation in assembly is below.
 
 ```
 			mov.b	0(r4), r7
@@ -47,7 +73,31 @@ Multiplication Ideas:
 
 ####Subtraction
 
+Subtraction is very similar to addition in that it just uses the `sub.b	r7, r8` to subtract the current value "typed" into the
+calculator from the previous value held in the calculator.
+
 ####Clearing
 
+The Clear routine will set the answer to zero and it will increment the instruction pointer.
+The reason for incrementing the instruciton pointer is to "load up" the next value into the calculator
+that will be incremented.
+
+Debugging: It took me a while to figure out that the calculator needed to increment the pointer to the program to take in the 
+value of the next number in the program before jumping back to main to figure out what subroutine was next.
+
+My clear subroutine is below:
+
+```
+CLR
+			mov.b	#0, r8
+			mov.b	r8, 0(r5)
+			mov.b	0(r4), r8
+			inc		r5
+			inc		r4
+			jmp		main
+```
+
 ####End
+
+The end method simply traps the CPU in loop.
 
